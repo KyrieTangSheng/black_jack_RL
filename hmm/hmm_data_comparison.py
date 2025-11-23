@@ -4,9 +4,13 @@ Test Composition of Different Datsets on HMM Performance
 We want to see if training on more wins will bias the model probabilities to achieve a better win rate.
 Date: November 22, 2025
 """
+import sys
+import pathlib
+sys.path.append(str(pathlib.Path(__file__).resolve().parent.parent))
+
 from src.environment.blackjack import BlackjackEnv
 from helper import process_data, test_hmm
-from random import random
+import random
 from copy import deepcopy
 import pandas as pd
 from tqdm import tqdm
@@ -45,7 +49,7 @@ def compose_data(pct_win, N_points=500000):
         # Update player hands
         turns = []
         while not env.game_over:
-            decision = random() >= 0.5 # stand / hold with equal probability
+            decision = random.random() >= 0.5 # stand / hold with equal probability
             _, _, _, info = env.step(decision)
             turn = {
                 'prev_action': 'hit' if decision else 'stand',
@@ -79,9 +83,10 @@ def compose_data(pct_win, N_points=500000):
 
 # run simulation with different percentages of wins
 df = []
-for pct in tqdm([0.1, 0.2, 0.3,0.4, 0.5, 0.6, 0.7]):
+for pct in tqdm([0, 0.1, 0.2, 0.3,0.4, 0.5, 0.6, 0.7]):
     stats = {}
     simulation = compose_data(pct, N_points=500000)
+    random.shuffle(simulation)
     emissions, states, lengths = process_data(simulation)
 
     stats["pct_win"] = pct
@@ -97,7 +102,7 @@ plt.plot(results["pct_win"], results["winrate"], marker="o", linewidth=2)
 plt.xlabel("Training Set Win Percentage (pct_win)")
 plt.ylabel("HMM Win Rate")
 plt.title("Effect of Training Win Composition on HMM Performance")
-plt.savefig("./figures/hmm_winrate_vs_training_winpct.png")
+plt.savefig("../figures/hmm_winrate_vs_training_winpct.png")
 
 # Optional: Plot draw rate too
 plt.figure(figsize=(8, 5))
@@ -105,4 +110,4 @@ plt.plot(results["pct_win"], results["drawrate"], marker="o", linewidth=2, color
 plt.xlabel("Training Set Win Percentage (pct_win)")
 plt.ylabel("HMM Draw Rate")
 plt.title("Effect of Training Win Composition on HMM Draw Rate")
-plt.savefig("./figures/hmm_drawrate_vs_training_winpct.png")
+plt.savefig("../figures/hmm_drawrate_vs_training_winpct.png")
