@@ -2,64 +2,50 @@
 
 CSE 150A / 250A Final Project
 
-### Setup
+## Setup
+
 ```bash
 # Install dependencies
-pip install numpy
+pip install -r requirements.txt
 ```
 
-### File Structure (So Far)
-```
-blackjack-rl-project/
-├── src/
-│   └── environment/
-│       ├── __init__.py
-│       ├── deck.py          # Card deck implementation
-│       └── blackjack.py     # Game environment
-└── examples/
-    └── simulate_game.py     # An Example Test/simulation script
-```
+## Hidden Markov Model (HMM) Part
 
-### Testing the Game
+[This section is reserved for Omar & Karen's HMM part]
 
-Run the simulation script:
+## Reinforcement Learning (RL) Part
+
+This project implements Q-learning for playing Blackjack. The RL agent learns an optimal policy through training and can be evaluated on its performance.
+
+### Running Experiments
+
+#### 1. Hyperparameter Search
+
+Run hyperparameter search to find the best hyperparameter combination:
+
 ```bash
-python examples/simulate_game.py
+python examples/hyperparameter_search.py
 ```
 
-This will give you an interactive menu to:
-1. Test environment functionality
-2. Simulate random games
-3. Play with basic strategy
-4. Play interactively as a human player
+This will:
+- Test different combinations of hyperparameters (discount, epsilon, learning rate)
+- Display a summary table with win rates for each combination
+- Identify the best hyperparameters
+- Generate a detailed training/evaluation plot for the best configuration
 
-### Quick Test in Python
+The results are saved to `figures/q_agent_best_hyperparams.png`.
 
-```python
-from src.environment.blackjack import BlackjackEnv
+#### 2. Single Training and Evaluation
 
-# Create environment
-env = BlackjackEnv()
+Train and evaluate a Q-agent with specific hyperparameters:
 
-# Start a game
-state = env.reset()
-print(f"Initial state: {state}")  # (player_sum, dealer_card, usable_ace)
-
-# Take action (0=stand, 1=hit)
-next_state, reward, done, info = env.step(1)  # Hit
-
-# Display the game
-env.render()
+```bash
+python examples/simulate_Q.py
 ```
 
-## Game Rules
+This will:
+- Train the agent with default hyperparameters (or modify the script to use custom values)
+- Evaluate the trained agent
+- Generate training and evaluation performance plots
 
-- **Goal**: Get closer to 21 than the dealer without going over
-- **Actions**: 
-  - Hit (1): Take another card
-  - Stand (0): Stop taking cards
-- **Dealer Strategy**: Hits on 16 or below, stands on 17+
-- **Card Values**: 
-  - Number cards: Face value
-  - Face cards (J, Q, K): 10
-  - Ace: 1 or 11 (whichever is better)
+The results are saved to `figures/q_agent_training_eval.png`.
