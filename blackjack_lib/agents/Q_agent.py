@@ -1,6 +1,6 @@
 import copy
 import random
-from blackjack_lib.environment.blackjack import BlackjackEnv
+from blackjack_lib.environment.blackjack import BlackjackEnv, MAX_HAND_VALUE
 
 STAND = 0
 HIT = 1
@@ -9,21 +9,26 @@ WIN_STATE = (1,0,0)
 DRAW_STATE = (0,0,0)
 LOSE_STATE = (-1,0,0)
 
-states = []
-states.append(WIN_STATE)
-states.append(DRAW_STATE)
-states.append(LOSE_STATE)
-for player_sum in range(2,22):
-    for dealer_card in range(1,11):
-        for usable_ace in [False, True]:
-            s = (player_sum, dealer_card, usable_ace)
-            states.append(s)
+def generate_states(max_hand_value):
+    states = []
+    states.append(WIN_STATE)
+    states.append(DRAW_STATE)
+    states.append(LOSE_STATE)
+    for player_sum in range(2, max_hand_value + 2):
+        for dealer_card in range(1,11):
+            for usable_ace in [False, True]:
+                s = (player_sum, dealer_card, usable_ace)
+                states.append(s)
+    return states
 
 class QAgent:
-    def __init__(self, discount=0.95, lr_base=10.0):
+    def __init__(self, discount=0.95, lr_base=10.0, max_hand_value=MAX_HAND_VALUE):
 
         self.discount = discount
         self.lr_base = lr_base
+        self.max_hand_value = max_hand_value
+
+        states = generate_states(max_hand_value)
 
         # For Q-learning values
         self.Q_values = {}   # Dictionary: Store the Q-Learning value of each state and action
@@ -35,7 +40,7 @@ class QAgent:
             self.N_Q[s] = [0,0]  # First element is the number of visits of "Stand" at state s, second element is the Q value of "Hit" at s
 
         # Game environment
-        self.env = BlackjackEnv()
+        self.env = BlackjackEnv(max_hand_value=max_hand_value)
         
         self.training_history = {
             'game_numbers': [],
