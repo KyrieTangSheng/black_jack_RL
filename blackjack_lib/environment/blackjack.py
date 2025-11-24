@@ -1,7 +1,7 @@
 from typing import Tuple, List, Dict
 from .deck import Deck
 
-MAX_HAND_VALUE = 25
+MAX_HAND_VALUE = 21
 
 
 class BlackjackEnv:

@@ -14,7 +14,7 @@ def generate_states(max_hand_value):
     states.append(WIN_STATE)
     states.append(DRAW_STATE)
     states.append(LOSE_STATE)
-    for player_sum in range(2, max_hand_value + 2):
+    for player_sum in range(2, max_hand_value + 1):
         for dealer_card in range(1,11):
             for usable_ace in [False, True]:
                 s = (player_sum, dealer_card, usable_ace)
