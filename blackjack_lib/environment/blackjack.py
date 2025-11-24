@@ -1,13 +1,16 @@
 from typing import Tuple, List, Dict
 from .deck import Deck
 
+MAX_HAND_VALUE = 25
+
 
 class BlackjackEnv:
     """Blackjack environment for reinforcement learning."""
     
-    def __init__(self, num_decks: int = 1, natural_payout: float = 1.0):
+    def __init__(self, num_decks: int = 1, natural_payout: float = 1.0, max_hand_value: int = MAX_HAND_VALUE):
         self.num_decks = num_decks
         self.natural_payout = natural_payout
+        self.max_hand_value = max_hand_value
         self.deck = Deck(num_decks=num_decks)
         
         self.player_hand: List[str] = []
@@ -40,7 +43,7 @@ class BlackjackEnv:
             self.player_hand.append(self.deck.deal())
             self.player_sum, self.usable_ace = self._calculate_hand(self.player_hand)
             
-            if self.player_sum > 21:
+            if self.player_sum > self.max_hand_value:
                 self.game_over = True
                 return (self.player_sum, dealer_card, self.usable_ace), -1.0, True, {'result': 'player_bust'}
             
@@ -57,7 +60,7 @@ class BlackjackEnv:
             self.dealer_hand.append(self.deck.deal())
             self.dealer_sum, _ = self._calculate_hand(self.dealer_hand)
         
-        if self.dealer_sum > 21:
+        if self.dealer_sum > self.max_hand_value:
             return 1.0, 'dealer_bust'
         elif self.player_sum > self.dealer_sum:
             return 1.0, 'player_win'
@@ -72,7 +75,7 @@ class BlackjackEnv:
         
         num_aces = sum(1 for card in hand if card[0] == 'A')
         
-        if num_aces > 0 and hand_sum + 10 <= 21:
+        if num_aces > 0 and hand_sum + 10 <= self.max_hand_value:
             hand_sum += 10
             usable_ace = True
         
@@ -112,7 +115,7 @@ class BlackjackEnv:
 class InteractiveBlackjack(BlackjackEnv):
     def play_interactive(self):
         print("\nWelcome to Blackjack!")
-        print("Goal: Get closer to 21 than the dealer without going over!")
+        print(f"Goal: Get closer to {self.max_hand_value} than the dealer without going over!")
         print("Actions: 'h' = Hit (take a card), 's' = Stand (stop)")
         
         state = self.reset()
@@ -136,7 +139,7 @@ class InteractiveBlackjack(BlackjackEnv):
                 
                 result = info['result']
                 if result == 'player_bust':
-                    print("BUST! You went over 21. Dealer wins!")
+                    print(f"BUST! You went over {self.max_hand_value}. Dealer wins!")
                 elif result == 'dealer_bust':
                     print("Dealer busts! You win!")
                 elif result == 'player_win':
