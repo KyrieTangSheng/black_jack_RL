@@ -53,3 +53,13 @@ This will:
 - Generate training and evaluation performance plots
 
 The results are saved to `figures/q_agent_training_eval.png`.
+
+### Configuring Maximum Hand Value
+
+To change the bust threshold (default is 21), modify the constant in `blackjack_lib/environment/blackjack.py`:
+
+```python
+MAX_HAND_VALUE = 25  # Change from 21 to 25
+```
+
+This will automatically update the game rules and the Q-agent's state space to match the new threshold.
