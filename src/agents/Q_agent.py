@@ -20,7 +20,10 @@ for player_sum in range(2,22):
             states.append(s)
 
 class QAgent:
-    def __init__(self):
+    def __init__(self, discount=0.95, lr_base=10.0):
+
+        self.discount = discount
+        self.lr_base = lr_base
 
         # For Q-learning values
         self.Q_values = {}   # Dictionary: Store the Q-Learning value of each state and action
@@ -33,19 +36,35 @@ class QAgent:
 
         # Game environment
         self.env = BlackjackEnv()
+        
+        self.training_history = {
+            'game_numbers': [],
+            'win_rates': [],
+            'rewards': []
+        }
 
-    # This is the fixed learning rate for TD and Q learning. 
-    @staticmethod
-    def alpha(n):
-        return 10.0/(9 + n)
+    def alpha(self, n):
+        return self.lr_base/(9 + n)
 
-    def Q_run(self, num_simulation, epsilon=0.4):
+    def Q_run(self, num_simulation, epsilon=0.4, track_performance=False, eval_interval=1000):
+
+        if track_performance:
+            self.training_history = {
+                'game_numbers': [],
+                'win_rates': [],
+                'rewards': []
+            }
+        
+        eval_window_wins = 0
+        eval_window_rewards = 0
+        eval_window_games = 0
 
         # Perform num_simulation rounds of simulations in each cycle of the overall game loop
         for simulation in range(num_simulation):
             state = self.env.reset()
             done = False
             reward = 0
+            episode_reward = 0
 
             while not done:
                 action = self.pick_action(state, epsilon)
@@ -61,10 +80,11 @@ class QAgent:
 
                 # Update the Q value for current state and action
                 self.N_Q[state][action] += 1
-                self.Q_values[state][action] += self.alpha(self.N_Q[state][action]) * (reward + DISCOUNT * max(self.Q_values[next_state]) - self.Q_values[state][action])
+                self.Q_values[state][action] += self.alpha(self.N_Q[state][action]) * (reward + self.discount * max(self.Q_values[next_state]) - self.Q_values[state][action])
 
                 state = next_state
                 reward = next_reward
+                episode_reward += reward
 
                 # Update the Q values for terminal state
                 if done:
@@ -72,6 +92,24 @@ class QAgent:
                     self.N_Q[state][STAND] += 1
                     self.Q_values[state][HIT] += self.alpha(self.N_Q[state][HIT]) * (reward - self.Q_values[state][HIT])
                     self.Q_values[state][STAND] += self.alpha(self.N_Q[state][STAND]) * (reward - self.Q_values[state][STAND])
+                    
+                    if track_performance:
+                        eval_window_games += 1
+                        eval_window_rewards += episode_reward
+                        if episode_reward > 0:
+                            eval_window_wins += 1
+                        
+                        if eval_window_games >= eval_interval:
+                            win_rate = eval_window_wins / eval_window_games
+                            avg_reward = eval_window_rewards / eval_window_games
+                            
+                            self.training_history['game_numbers'].append(simulation + 1)
+                            self.training_history['win_rates'].append(win_rate)
+                            self.training_history['rewards'].append(avg_reward)
+                            
+                            eval_window_wins = 0
+                            eval_window_rewards = 0
+                            eval_window_games = 0
 
     def pick_action(self, s, epsilon):
         if random.random() < epsilon:
