@@ -4,7 +4,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from src.agents.Q_agent import QAgent
+from blackjack_lib.agents.Q_agent import QAgent
 import pandas as pd
 from simulate_Q import evaluate_win_rate, evaluate_Q, plot_training_evaluation_performance
 

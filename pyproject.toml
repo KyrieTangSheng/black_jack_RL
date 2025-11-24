@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=64.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "blackjack_lib"
+version = "0.1.0"
+description = "HMM and RL models for blackjack"
+readme = "README.md"
+requires-python = ">=3.9"
+
+[tool.setuptools.packages.find]
+include = ["blackjack_lib*"]
+
+[tool.wheel]
+include = ["blackjack_lib*"]

@@ -3,15 +3,19 @@
 CSE 150A / 250A Final Project
 
 ## Setup
-
+From project root:
 ```bash
 # Install dependencies
 pip install -r requirements.txt
+# Install blackjack_lib library
+pip install -e .
 ```
 
 ## Hidden Markov Model (HMM) Part
-
-[This section is reserved for Omar & Karen's HMM part]
+Order of execution:
+1. Run `python blackjack_lib/hmm/hmm_create_data.py` to create the data necessary for HMM
+2. Run `python blackjack_lib/hmm/hmm_vanilla_implementation.py` to get results for HMM vanilla implementation
+3. Run `python blackjack_lib/hmm/hmm_data_comparison.py` to get results for different winrate comparisons for HMM
 
 ## Reinforcement Learning (RL) Part
 

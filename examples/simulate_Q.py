@@ -3,7 +3,7 @@ import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.agents.Q_agent import QAgent
+from blackjack_lib.agents.Q_agent import QAgent
 import matplotlib.pyplot as plt
 
 def evaluate_Q(agent, num_games=10000, track_performance=False):

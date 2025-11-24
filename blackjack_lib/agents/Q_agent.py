@@ -1,6 +1,6 @@
 import copy
 import random
-from src.environment.blackjack import BlackjackEnv
+from blackjack_lib.environment.blackjack import BlackjackEnv
 
 STAND = 0
 HIT = 1

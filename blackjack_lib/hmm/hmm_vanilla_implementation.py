@@ -1,10 +1,14 @@
 from typing import Literal
 from seqlearn.hmm import MultinomialHMM
-from src.environment.blackjack import BlackjackEnv
+from blackjack_lib.environment.blackjack import BlackjackEnv
 import json
 import numpy as np
 from tqdm import tqdm
 import copy
+
+RAW_DATA_PATH = 'blackjack_data.json'
+
+raw_data = json.load(open(RAW_DATA_PATH))
 
 def card_to_index(card: str):
     # converts card to 0-51 index
@@ -42,6 +46,7 @@ def process_data(data):
 
         cur_player_sum = card_to_index(sample['player_hand'][0])+card_to_index(sample['player_hand'][1])
         dealer_up_card = card_to_index(sample['dealer_hand'][0])
+        
         # get turn states and emissions
         for turn in sample['turns']:
             cur_states.append(description_to_state(turn['prev_action']))
@@ -66,7 +71,17 @@ def process_data(data):
     return emissions, states, lengths
 
 
-def test_hmm(N_rounds, emissions, states, lengths):
+emissions, states, lengths = process_data(raw_data)
+
+wins = 0
+draws = 0
+for sample in tqdm(raw_data):
+    wins += 1 if (sample['outcome'] == 'player_win' or sample['outcome'] == 'dealer_bust') else 0
+    draws += 1 if sample['outcome'] == 'draw' else 0
+print('win rate (random):', wins/len(raw_data))
+print('draw rate (random):', draws/len(raw_data))
+
+def test_hmm(N_rounds):
     mhmm = MultinomialHMM()
     mhmm.fit(emissions, states, lengths=lengths)
     env = BlackjackEnv()
@@ -94,3 +109,7 @@ def test_hmm(N_rounds, emissions, states, lengths):
         wins += 1 if (info['result'] == 'player_win' or info['result'] == 'dealer_bust') else 0
         draws += 1 if info['result'] == 'draw' else 0
     return wins/N_rounds, draws/N_rounds
+
+winrate, drawrate = test_hmm(10000)
+print('win rate (HMM):', winrate) # 0.384 optimize for win 0.383 optimize for lose
+print('draw rate (HMM):', drawrate) # 0.0495 for win 0.0499 optimize for lose

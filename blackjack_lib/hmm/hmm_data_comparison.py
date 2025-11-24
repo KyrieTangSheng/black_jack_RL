@@ -8,7 +8,7 @@ import sys
 import pathlib
 sys.path.append(str(pathlib.Path(__file__).resolve().parent.parent))
 
-from src.environment.blackjack import BlackjackEnv
+from blackjack_lib.environment.blackjack import BlackjackEnv
 from helper import process_data, test_hmm
 import random
 from copy import deepcopy

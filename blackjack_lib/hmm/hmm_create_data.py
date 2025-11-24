@@ -1,4 +1,4 @@
-from src.environment.blackjack import BlackjackEnv
+from blackjack_lib.environment.blackjack import BlackjackEnv
 from random import random
 from copy import deepcopy
 import json
