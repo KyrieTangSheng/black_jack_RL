@@ -1,5 +1,6 @@
 import sys
 import os
+import time
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -174,12 +175,18 @@ def train_evaluate_Q(num_train=50000, num_eval=10000, track_performance=True,
     agent = QAgent(discount=discount, lr_base=lr_base)
     
     print(f"Training agent ({num_train} games)...")
+    train_start = time.time()
     agent.Q_run(num_simulation=num_train, epsilon=epsilon, 
                 track_performance=track_performance, 
                 eval_interval=train_eval_interval) 
-    print("Training complete.")
+    train_time = time.time() - train_start
+    print(f"Training complete. Time: {train_time:.2f}s ({train_time/60:.2f} minutes)")
     
+    eval_start = time.time()
     eval_history = evaluate_Q(agent, num_games=num_eval, track_performance=track_performance)
+    eval_time = time.time() - eval_start
+    print(f"Evaluation complete. Time: {eval_time:.2f}s")
+    print(f"Total time: {train_time + eval_time:.2f}s ({(train_time + eval_time)/60:.2f} minutes)\n")
     
     if plot and track_performance:
         plot_training_evaluation_performance(agent, eval_history, num_train, num_eval, 
