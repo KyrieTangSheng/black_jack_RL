@@ -18,8 +18,8 @@ from tqdm import tqdm
 import matplotlib
 matplotlib.use("Agg") 
 from matplotlib import pyplot as plt
-
-
+import json
+import time
 
 def compose_data(pct_win, N_points=500000):
     """
@@ -80,7 +80,6 @@ def compose_data(pct_win, N_points=500000):
 
     return dataset
 
-
 # run simulation with different percentages of wins
 df = []
 for pct in tqdm([0, 0.1, 0.2, 0.3,0.4, 0.5, 0.6, 0.7]):
@@ -90,10 +89,15 @@ for pct in tqdm([0, 0.1, 0.2, 0.3,0.4, 0.5, 0.6, 0.7]):
     emissions, states, lengths = process_data(simulation)
 
     stats["pct_win"] = pct
-    winrate, drawrate = test_hmm(1000, emissions, states, lengths)
+    start_time = time.perf_counter()
+    winrate, drawrate = test_hmm(10000, emissions, states, lengths)
+    end_time = time.perf_counter()
     stats["winrate"] = winrate
     stats["drawrate"] = drawrate
+    stats['time'] = end_time - start_time
     df.append(stats)
+
+json.dump(df, open('stats.json', 'w'), indent=4)
 
 results = pd.DataFrame(df)
 # Plot win rate vs training win percentage

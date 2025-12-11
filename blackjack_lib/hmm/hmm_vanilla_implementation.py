@@ -84,6 +84,7 @@ print('draw rate (random):', draws/len(raw_data))
 def test_hmm(N_rounds):
     mhmm = MultinomialHMM()
     mhmm.fit(emissions, states, lengths=lengths)
+    print(np.exp(mhmm.intercept_trans_))
     env = BlackjackEnv()
     wins = 0
     draws = 0
