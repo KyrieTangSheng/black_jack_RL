@@ -1,5 +1,6 @@
 import sys
 import os
+import time
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -32,6 +33,8 @@ def hyperparameter_search(discounts=[0.9, 0.95, 0.99],
     print(f"Evaluation Games: {num_eval:,}")
     print(f"{'='*80}\n")
     
+    start_time = time.time()
+    
     for discount in discounts:
         for epsilon in epsilons:
             for lr_base in lr_bases:
@@ -40,11 +43,13 @@ def hyperparameter_search(discounts=[0.9, 0.95, 0.99],
                 if verbose:
                     print(f"[{current}/{total_combinations}] Testing: γ={discount:.2f}, ε={epsilon:.2f}, LR_base={lr_base:.1f}...", end=" ")
                 
+                combo_start = time.time()
                 agent = QAgent(discount=discount, lr_base=lr_base)
                 agent.Q_run(num_simulation=num_train, epsilon=epsilon, 
                            track_performance=False, eval_interval=train_eval_interval)
                 
                 win_rate = evaluate_win_rate(agent, num_games=num_eval)
+                combo_time = time.time() - combo_start
                 
                 results.append({
                     'Discount': discount,
@@ -54,7 +59,9 @@ def hyperparameter_search(discounts=[0.9, 0.95, 0.99],
                 })
                 
                 if verbose:
-                    print(f"Win Rate: {win_rate:.4f}")
+                    print(f"Win Rate: {win_rate:.4f} (Time: {combo_time:.2f}s)")
+    
+    total_time = time.time() - start_time
     
     df = pd.DataFrame(results)
     df = df.sort_values('Win_Rate', ascending=False)
@@ -71,6 +78,8 @@ def hyperparameter_search(discounts=[0.9, 0.95, 0.99],
     print(f"  Epsilon (ε): {best_params['Epsilon']:.2f}")
     print(f"  Learning Rate Base: {best_params['LR_Base']:.1f}")
     print(f"  Win Rate: {best_params['Win_Rate']:.4f} ({best_params['Win_Rate']*100:.2f}%)")
+    print(f"\nTotal Search Time: {total_time:.2f}s ({total_time/60:.2f} minutes)")
+    print(f"Average Time per Combination: {total_time/total_combinations:.2f}s")
     print(f"{'='*80}\n")
     
     return df, best_params
@@ -79,11 +88,18 @@ def plot_best_hyperparameters(best_params, num_train=50000, num_eval=10000,
                               train_eval_interval=1000, save_path=None):
     print(f"Training and plotting with best hyperparameters...")
     
+    train_start = time.time()
     agent = QAgent(discount=best_params['Discount'], lr_base=best_params['LR_Base'])
     agent.Q_run(num_simulation=num_train, epsilon=best_params['Epsilon'], 
                track_performance=True, eval_interval=train_eval_interval)
+    train_time = time.time() - train_start
+    print(f"Training completed in {train_time:.2f}s ({train_time/60:.2f} minutes)")
     
+    eval_start = time.time()
     eval_history = evaluate_Q(agent, num_games=num_eval, track_performance=True)
+    eval_time = time.time() - eval_start
+    print(f"Evaluation completed in {eval_time:.2f}s")
+    print(f"Total time: {train_time + eval_time:.2f}s ({(train_time + eval_time)/60:.2f} minutes)\n")
     
     if save_path is None:
         project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
